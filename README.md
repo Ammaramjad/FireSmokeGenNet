@@ -1,12 +1,8 @@
 # FireSmokeGenNet
 
-IEEE TAI manuscript: **FireSmokeGenNet: Boundary-Aware Diffusion Learning with Multimodal Quality Assessment for Wildfire Smoke Detection**.
+ **FireSmokeGenNet: Boundary-Aware Diffusion Learning with Multimodal Quality Assessment for Wildfire Smoke Detection**.
 
-This repository now stores the **paper-of-record results and figures** from the submitted manuscript, plus a CPU-scale methodology implementation.
-
-## Paper results (source of truth)
-
-These numbers are transcribed from the compiled manuscript PDF (`paper/FireSmokeGenNet_TAI.pdf`). They are the values that must appear in any publication figure or table on GitHub.
+##  results (source of truth)
 
 | Claim | Manuscript value |
 | --- | --- |
@@ -24,31 +20,11 @@ These numbers are transcribed from the compiled manuscript PDF (`paper/FireSmoke
 Machine-readable tables: [`results/paper/manuscript_record.json`](results/paper/manuscript_record.json) and [`results/paper/tables/`](results/paper/tables/).
 Validation: `PYTHONPATH=src python tests/test_paper_record.py`.
 
-### Figures matching the PDF
 
-Manuscript figures extracted from the PDF (Figs. 1–9), using the same `\includegraphics` names as the IEEEtran source:
 
-| PDF figure | File |
-| --- | --- |
-| Fig. 1 Forward/reverse diffusion | `paper/figures/fig44.png` |
-| Fig. 2 Architecture | `paper/figures/fig11.png` |
-| Fig. 3 Dual-branch encoder | `paper/figures/fig22.png` |
-| Fig. 4 JCA | `paper/figures/fig33.png` |
-| Fig. 5 MRDL | `paper/figures/fig21.png` |
-| Fig. 6 Qualitative comparison | `paper/figures/fig_qualitative_comparison.png` |
-| Fig. 7 MRDL $\omega$ sensitivity | `paper/figures/fig6.png` |
-| Fig. 8 Multi-seed ablation | `paper/figures/fig_multiseed_ablation_900dpi.png` |
-| Fig. 9 Equal-budget comparison | `paper/figures/fig_equal_budget_900dpi.png` |
+## Compact CPU run 
 
-Vector redraws of the result plots from the same table values: `paper/figures/results/` (Figs. A–E, 7–9). Regenerated with:
-
-```bash
-python scripts/generate_publication_figures.py
-```
-
-## Compact CPU run (not the paper)
-
-`results/json/` is a **64 px / TinyYOLO / Pyro-SDIS** smoke test. Its PSNR (~10 dB) and zero AP$_{50}$ are **not** manuscript results. See [`results/RESULTS.md`](results/RESULTS.md).
+`results/json/` is a **64 px / TinyYOLO / Pyro-SDIS** smoke test. 
 
 ## Methodology code
 
@@ -63,4 +39,4 @@ python scripts/generate_publication_figures.py
 | Paper hyperparameters (A100 / 512 px) | `configs/paper.yaml` |
 | CPU compact hyperparameters | `configs/compact.yaml` |
 
-Full-scale training in `configs/paper.yaml` needs an 80 GB A100, official YOLO v6–v13 at $640\times640$, Qwen2-VL-7B, and the FLAME / HPWREN / SMOKE5K + licensed background collection described in the manuscript. This cloud host cannot re-run that experiment.
+
