@@ -1,0 +1,32 @@
+{
+  "no_jca": {
+    "ap50": 0.0,
+    "ap50_95": 0.0,
+    "precision": 0.0,
+    "recall": 0.0
+  },
+  "no_mrdl": {
+    "ap50": 0.0,
+    "ap50_95": 0.0,
+    "precision": 0.0,
+    "recall": 0.0
+  },
+  "rand_encoder": {
+    "ap50": 0.0,
+    "ap50_95": 0.0,
+    "precision": 0.0,
+    "recall": 0.0
+  },
+  "full": {
+    "ap50": 0.0,
+    "ap50_95": 0.0,
+    "precision": 0.0,
+    "recall": 0.0
+  },
+  "unfiltered": {
+    "ap50": 0.0,
+    "ap50_95": 0.0,
+    "precision": 0.0,
+    "recall": 0.0
+  }
+}

@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from ..data.dataset import DetectorDataset
+from ..data.dataset import DetectorDataset, pad_box
 from ..metrics.core import average_precision, precision_recall
 from ..models.detector import TinyYOLO, decode_boxes, yolo_loss
 
@@ -71,7 +71,7 @@ def evaluate_detector(model, items: list[dict], cfg: dict, device: torch.device)
         pred_boxes.extend(boxes)
         pred_scores.extend(scores)
         for item in batch_items:
-            gt_boxes.append(item.get("boxes") or [])
+            gt_boxes.append([pad_box(b, size) for b in (item.get("boxes") or [])])
     ap50 = average_precision(pred_boxes, pred_scores, gt_boxes, 0.5)
     ap_list = [average_precision(pred_boxes, pred_scores, gt_boxes, t) for t in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]]
     prec, rec = precision_recall(

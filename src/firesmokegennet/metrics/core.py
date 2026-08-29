@@ -19,7 +19,10 @@ def psnr_background(pred: np.ndarray, ref: np.ndarray, preserve: np.ndarray) -> 
     a, b, k = _masked(pred, ref, preserve)
     if k.sum() < 16:
         return 0.0
-    return float(peak_signal_noise_ratio(b, a, data_range=1.0))
+    value = float(peak_signal_noise_ratio(b, a, data_range=1.0))
+    if not np.isfinite(value):
+        return 60.0
+    return float(min(value, 60.0))
 
 
 def ssim_background(pred: np.ndarray, ref: np.ndarray, preserve: np.ndarray) -> float:
@@ -45,6 +48,10 @@ def prompt_sim(image: np.ndarray, mask: np.ndarray) -> float:
 
 
 def frechet_distance(x: np.ndarray, y: np.ndarray) -> float:
+    x = np.atleast_2d(x)
+    y = np.atleast_2d(y)
+    if x.shape[0] < 2 or y.shape[0] < 2:
+        return float(np.sum((x.mean(axis=0) - y.mean(axis=0)) ** 2))
     mu1, mu2 = x.mean(axis=0), y.mean(axis=0)
     c1 = np.cov(x, rowvar=False) + 1e-6 * np.eye(x.shape[1])
     c2 = np.cov(y, rowvar=False) + 1e-6 * np.eye(y.shape[1])

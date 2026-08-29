@@ -157,8 +157,8 @@ def main():
     splits, bg_recs, mask_dir = prepare_data(cfg, data_root)
     size = cfg["image_size"]
     train_smoke = extract_masks(splits["train"], mask_dir, cfg["data"]["max_masks"])
-    val_smoke = extract_masks(splits["val"], mask_dir, max(20, cfg["data"]["detector_smoke"] // 6))
-    test_smoke = extract_masks(splits["test"], mask_dir, max(30, cfg["data"]["detector_smoke"] // 4))
+    val_smoke = extract_masks(splits["val"], mask_dir, max(40, cfg["data"]["detector_smoke"] // 4))
+    test_smoke = extract_masks(splits["test"], mask_dir, max(50, cfg["data"]["detector_smoke"] // 3))
 
     gen_ds = GeneratorDataset(train_smoke, size, cache_masks=mask_dir)
     vae = train_vae(gen_ds, cfg, device, out / "ckpts")
@@ -228,11 +228,14 @@ def main():
             prompt = PROMPT_TEMPLATES[seed % len(PROMPT_TEMPLATES)]
             text = torch.tensor(tokenize_prompt(prompt)).unsqueeze(0).float()
             img = generate_image(unet, vae, mask_t, masked_t, text, cfg, device, seed=seed)
+            mnp = mask
+            bg_vis = bg_np
+            composed = img * mnp[..., None] + bg_vis * (1.0 - mnp[..., None])
             blend = alpha_blend_baseline(bg_np, mask, seed=seed)
-            scores = heuristic_scores(img, mask)
+            scores = heuristic_scores(composed, mask)
             q = composite_quality(scores)
             name = f"pair{pi:03d}_v{v}.png"
-            Image.fromarray((img * 255).astype(np.uint8)).save(synth_dir / name)
+            Image.fromarray((composed * 255).astype(np.uint8)).save(synth_dir / name)
             bbox = mask_to_bbox((mask * 255).astype(np.uint8))
             candidates.append(
                 {
@@ -242,6 +245,7 @@ def main():
                     "mask": mask,
                     "bg": bg_np,
                     "image": img,
+                    "composed": composed,
                     "blend": blend,
                     "prompt": prompt,
                     "boxes": [[float(b) for b in bbox]],
@@ -346,7 +350,7 @@ def main():
             )
             det_results[family]["real"].append(real_metrics)
             det_results[family]["mixed"].append(mixed_metrics)
-            print(family, seed, real_metrics["ap50"], mixed_metrics["ap50"])
+            print(family, seed, real_metrics["ap50"], mixed_metrics["ap50"], flush=True)
 
     table_rows = []
     pvals = []

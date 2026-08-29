@@ -41,7 +41,9 @@ Results are written to `results/tables/`, `results/figures/`, `results/json/`, a
 
 Full-scale paper settings live in `configs/paper.yaml` (512px, SD-2-sized U-Net, 20k generator steps, Qwen2-VL-7B, official YOLO families). That configuration needs an 80 GB A100-class GPU.
 
-## Scale differences vs the paper
+## Results
+
+Compact public-data numbers, claim-by-claim, live in [`results/RESULTS.md`](results/RESULTS.md). Tables are under `results/tables/`, figures under `results/figures/`.
 
 | Item | Paper | Compact run |
 | --- | --- | --- |

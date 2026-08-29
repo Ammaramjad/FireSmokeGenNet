@@ -1,0 +1,38 @@
+[
+  {
+    "threshold": "10%",
+    "size": 81,
+    "ap50": 0.0,
+    "recall": 0.0
+  },
+  {
+    "threshold": "20%",
+    "size": 90,
+    "ap50": 0.0,
+    "recall": 0.0
+  },
+  {
+    "threshold": "30%",
+    "size": 100,
+    "ap50": 0.0,
+    "recall": 0.0
+  },
+  {
+    "threshold": "40%",
+    "size": 109,
+    "ap50": 0.0,
+    "recall": 0.0
+  },
+  {
+    "threshold": "50%",
+    "size": 119,
+    "ap50": 0.0,
+    "recall": 0.0
+  },
+  {
+    "threshold": "No filtering",
+    "size": 167,
+    "ap50": 0.0,
+    "recall": 0.0
+  }
+]

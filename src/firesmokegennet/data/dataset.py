@@ -21,6 +21,18 @@ def _load_rgb(path: str, size: int) -> np.ndarray:
     return arr
 
 
+def pad_box(box, image_size: int, min_side: float = 24.0):
+    x1, y1, x2, y2 = [float(v) for v in box]
+    cx, cy = 0.5 * (x1 + x2), 0.5 * (y1 + y2)
+    w, h = max(x2 - x1, min_side), max(y2 - y1, min_side)
+    return [
+        max(0.0, cx - w / 2),
+        max(0.0, cy - h / 2),
+        min(float(image_size), cx + w / 2),
+        min(float(image_size), cy + h / 2),
+    ]
+
+
 class GeneratorDataset(Dataset):
     def __init__(self, records: list[dict], image_size: int, text_dim: int = 64, cache_masks: Path | None = None):
         self.records = records
@@ -78,11 +90,12 @@ class DetectorDataset(Dataset):
         target = torch.zeros(self.grid, self.grid, 5, dtype=torch.float32)
         boxes = item.get("boxes") or []
         for box in boxes:
+            box = pad_box(box, self.image_size)
             x1, y1, x2, y2 = box
             xc = 0.5 * (x1 + x2) / self.image_size
             yc = 0.5 * (y1 + y2) / self.image_size
-            w = max(x2 - x1, 1) / self.image_size
-            h = max(y2 - y1, 1) / self.image_size
+            w = max(x2 - x1, 4.0) / self.image_size
+            h = max(y2 - y1, 4.0) / self.image_size
             gi = min(self.grid - 1, max(0, int(xc * self.grid)))
             gj = min(self.grid - 1, max(0, int(yc * self.grid)))
             target[gj, gi] = torch.tensor(

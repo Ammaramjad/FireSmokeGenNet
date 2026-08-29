@@ -72,13 +72,13 @@ data:
 
 detector:
   families: [yolov6, yolov7, yolov8, yolov9, yolov10, yolov11, yolov12, yolov13]
-  input_size: 64
+  input_size: 128
   lr: 1.0e-3
-  batch_size: 16
-  epochs: 12
+  batch_size: 8
+  epochs: 18
   warmup_epochs: 1
   weight_decay: 5.0e-4
-  conf_threshold: 0.25
+  conf_threshold: 0.10
   nms_iou: 0.45
   seeds: [42, 123, 3407, 2025, 2026]
   grid_size: 8

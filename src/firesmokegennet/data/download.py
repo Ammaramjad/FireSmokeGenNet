@@ -42,15 +42,21 @@ def download_pyrosdis_subset(
     ds = load_dataset("pyronear/pyro-sdis", split="train", streaming=True)
     records = []
     seen_cameras: dict[str, int] = {}
-    for ex in tqdm(ds, desc="pyro-sdis", total=max_images * 3):
+    for ex in tqdm(ds, desc="pyro-sdis", total=max_images):
         if len(records) >= max_images:
             break
         ann = (ex.get("annotations") or "").strip()
         if not ann:
             continue
+        boxes = yolo_to_xyxy(ann, 1, 1)
+        if not boxes:
+            continue
+        area = max((x2 - x1) * (y2 - y1) for x1, y1, x2, y2 in boxes)
+        # Prefer plumes that remain localized at compact resolution.
+        if area < 0.006 and rng.random() > 0.05:
+            continue
         camera = str(ex.get("camera") or "unknown")
-        # Cap per-camera frames so the source-level split stays diverse.
-        if seen_cameras.get(camera, 0) >= 10:
+        if seen_cameras.get(camera, 0) >= 40:
             continue
         image: Image.Image = ex["image"].convert("RGB")
         name = str(ex.get("image_name") or f"{camera}_{len(records)}.jpg")
@@ -157,6 +163,9 @@ def _procedural_landscapes(out_dir: Path, n: int, start: int = 0) -> list[dict]:
         Image.fromarray((img * 255).astype(np.uint8)).save(path, quality=90)
         records.append({"path": str(path), "source": "procedural-landscape", "has_smoke": False})
     return records
+
+
+def yolo_to_xyxy(ann: str, width: int, height: int) -> list[list[float]]:
     boxes = []
     for line in ann.strip().splitlines():
         parts = line.strip().split()

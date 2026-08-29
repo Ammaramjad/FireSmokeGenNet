@@ -1,104 +1,104 @@
-"""Compact YOLO-family stand-ins used for the paper's eight-detector protocol."""
+"""Compact YOLO-family stand-ins: single-plume box heads on a frozen ResNet-18."""
 
 from __future__ import annotations
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.models import ResNet18_Weights, resnet18
 
-# Increasing width/depth across v6..v13 mirrors the paper's family sweep.
 FAMILY_SPEC = {
-    "yolov6": {"width": 0.35, "depth": 1},
-    "yolov7": {"width": 0.45, "depth": 1},
-    "yolov8": {"width": 0.55, "depth": 2},
-    "yolov9": {"width": 0.65, "depth": 2},
-    "yolov10": {"width": 0.75, "depth": 2},
-    "yolov11": {"width": 0.85, "depth": 3},
-    "yolov12": {"width": 0.95, "depth": 3},
-    "yolov13": {"width": 1.10, "depth": 3},
+    "yolov6": {"hidden": 64, "depth": 1},
+    "yolov7": {"hidden": 80, "depth": 1},
+    "yolov8": {"hidden": 96, "depth": 2},
+    "yolov9": {"hidden": 112, "depth": 2},
+    "yolov10": {"hidden": 128, "depth": 2},
+    "yolov11": {"hidden": 144, "depth": 3},
+    "yolov12": {"hidden": 160, "depth": 3},
+    "yolov13": {"hidden": 192, "depth": 3},
 }
 
 
 class TinyYOLO(nn.Module):
+    """Predicts one smoke box per image (cx, cy, w, h, obj), matching MaxComponent(M)."""
+
     def __init__(self, family: str = "yolov13", grid: int = 8):
         super().__init__()
         spec = FAMILY_SPEC[family]
-        w = spec["width"]
-        d = spec["depth"]
-        c1 = max(8, int(16 * w))
-        c2 = max(16, int(32 * w))
-        c3 = max(24, int(64 * w))
-        layers = [nn.Conv2d(3, c1, 3, stride=2, padding=1), nn.SiLU()]
-        for _ in range(d):
-            layers += [nn.Conv2d(c1, c1, 3, padding=1), nn.SiLU()]
-        layers += [nn.Conv2d(c1, c2, 3, stride=2, padding=1), nn.SiLU()]
-        for _ in range(d):
-            layers += [nn.Conv2d(c2, c2, 3, padding=1), nn.SiLU()]
-        layers += [nn.Conv2d(c2, c3, 3, stride=2, padding=1), nn.SiLU()]
-        self.backbone = nn.Sequential(*layers)
-        self.head = nn.Conv2d(c3, 5, 1)
+        backbone = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+        children = list(backbone.children())
+        self.stem = nn.Sequential(*children[:-3])  # through layer3, frozen
+        self.layer4 = children[-3]  # trainable
+        self.pool = children[-2]
+        for p in self.stem.parameters():
+            p.requires_grad = False
+        hidden, depth = spec["hidden"], spec["depth"]
+        layers: list[nn.Module] = [nn.Flatten(), nn.Linear(512, hidden), nn.SiLU()]
+        for _ in range(depth):
+            layers += [nn.Linear(hidden, hidden), nn.SiLU()]
+        layers.append(nn.Linear(hidden, 5))
+        self.head = nn.Sequential(*layers)
+        # Start near a mid-frame 20% box rather than a degenerate 4px box.
+        nn.init.constant_(self.head[-1].bias, 0.0)
+        self.head[-1].bias.data[2:4] = -1.4  # sigmoid ~0.20
+        self.head[-1].bias.data[4] = -1.0
         self.grid = grid
         self.family = family
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        h = self.backbone(x)
-        h = F.adaptive_avg_pool2d(h, (self.grid, self.grid))
-        return self.head(h).permute(0, 2, 3, 1)  # B,G,G,5
+        with torch.no_grad():
+            h = self.stem(x)
+        h = self.pool(self.layer4(h))
+        out = self.head(h)
+        return out[:, None, None, :]
 
 
 def yolo_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    obj = target[..., 4:5]
-    bce = F.binary_cross_entropy_with_logits(pred[..., 4:5], obj)
-    box = F.mse_loss(torch.sigmoid(pred[..., :4]) * obj, target[..., :4] * obj)
+    # Collapse any grid to a single object: take the max-objectness cell as GT if present.
+    obj_map = target[..., 4]
+    b = target.size(0)
+    gt = torch.zeros(b, 5, device=target.device)
+    for i in range(b):
+        flat = obj_map[i].reshape(-1)
+        if flat.max() > 0:
+            idx = int(flat.argmax())
+            gt[i] = target[i].reshape(-1, 5)[idx]
+            # Convert cell-relative xy to image-normalized cx, cy.
+            g = target.size(1)
+            gj, gi = divmod(idx, g) if False else (idx // g, idx % g)
+            dx, dy, w, h, o = gt[i]
+            gt[i, 0] = (gi + dx) / g
+            gt[i, 1] = (gj + dy) / g
+            gt[i, 2] = w
+            gt[i, 3] = h
+            gt[i, 4] = 1.0
+    pred = pred.reshape(b, 5)
+    bce = F.binary_cross_entropy_with_logits(pred[:, 4], gt[:, 4])
+    pos = gt[:, 4] > 0.5
+    if pos.any():
+        box = 6.0 * F.mse_loss(torch.sigmoid(pred[pos, :4]), gt[pos, :4])
+    else:
+        box = pred.new_zeros(())
     return bce + box
 
 
 @torch.no_grad()
 def decode_boxes(pred: torch.Tensor, image_size: int, conf_thr: float = 0.25, nms_iou: float = 0.45):
-    """Convert grid predictions to xyxy boxes."""
-    from ..metrics.core import box_iou
-    import numpy as np
-
-    pred = pred.cpu()
-    b, g, _, _ = pred.shape
+    pred = pred.cpu().reshape(pred.size(0), -1, 5)
     all_boxes, all_scores = [], []
-    for n in range(b):
-        boxes, scores = [], []
-        logits = pred[n]
-        conf = torch.sigmoid(logits[..., 4])
-        xywh = torch.sigmoid(logits[..., :4])
-        for gj in range(g):
-            for gi in range(g):
-                c = float(conf[gj, gi])
-                if c < conf_thr:
-                    continue
-                dx, dy, w, h = [float(v) for v in xywh[gj, gi]]
-                xc = (gi + dx) / g
-                yc = (gj + dy) / g
-                bw = max(w, 1e-3)
-                bh = max(h, 1e-3)
-                x1 = (xc - bw / 2) * image_size
-                y1 = (yc - bh / 2) * image_size
-                x2 = (xc + bw / 2) * image_size
-                y2 = (yc + bh / 2) * image_size
-                boxes.append([x1, y1, x2, y2])
-                scores.append(c)
-        keep = _nms(boxes, scores, nms_iou)
-        all_boxes.append([boxes[i] for i in keep])
-        all_scores.append([scores[i] for i in keep])
+    for n in range(pred.size(0)):
+        logit = pred[n, 0]
+        conf = float(torch.sigmoid(logit[4]))
+        if conf < conf_thr:
+            all_boxes.append([])
+            all_scores.append([])
+            continue
+        cx, cy, w, h = torch.sigmoid(logit[:4]).tolist()
+        w, h = max(w, 4.0 / image_size), max(h, 4.0 / image_size)
+        x1 = (cx - w / 2) * image_size
+        y1 = (cy - h / 2) * image_size
+        x2 = (cx + w / 2) * image_size
+        y2 = (cy + h / 2) * image_size
+        all_boxes.append([[x1, y1, x2, y2]])
+        all_scores.append([conf])
     return all_boxes, all_scores
-
-
-def _nms(boxes, scores, iou_thr):
-    from ..metrics.core import box_iou
-    import numpy as np
-
-    if not boxes:
-        return []
-    order = list(np.argsort(-np.asarray(scores)))
-    keep = []
-    while order:
-        i = order.pop(0)
-        keep.append(i)
-        order = [j for j in order if box_iou(np.asarray(boxes[i]), np.asarray(boxes[j])) < iou_thr]
-    return keep

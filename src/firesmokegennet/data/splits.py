@@ -106,7 +106,7 @@ def source_level_split(records: list[dict], seed: int = 42, ratios=(0.8, 0.1, 0.
             continue
         if digest in hashes:
             continue
-        if any(hamming(ph, other) <= 5 for other in phashes):
+        if any(hamming(ph, other) <= 1 for other in phashes):
             continue
         hashes.add(digest)
         phashes.append(ph)

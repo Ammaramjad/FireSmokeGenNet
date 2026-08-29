@@ -55,10 +55,7 @@ def generate_image(
         z = ddim_step(z, t_batch, t_prev, eps, schedule)
     x = vae.decode(z).clamp(-1, 1)
     img = ((x[0].permute(1, 2, 0).cpu().numpy() + 1) / 2).clip(0, 1)
-    # Composite: keep known background pixels from the masked image.
-    m = mask[0, 0].cpu().numpy()
-    bg = ((masked_image[0].permute(1, 2, 0).cpu().numpy() + 1) / 2).clip(0, 1)
-    return img * m[..., None] + bg * (1.0 - m[..., None])
+    return img
 
 
 def alpha_blend_baseline(background: np.ndarray, mask: np.ndarray, seed: int = 0) -> np.ndarray:
