@@ -1,0 +1,7 @@
+method,psnr,ssim,lpips1,clip_sim
+Stable Diffusion,25.1,0.78,0.87,0.251
+PowerPaint,25.6,0.8,0.89,0.253
+SD-Inpainting,26.0,0.81,0.9,0.255
+BLD,26.3,0.83,0.91,0.254
+FlameDiffuser,27.1,0.85,0.91,0.256
+FireSmokeGenNet,28.1,0.88,0.92,0.258

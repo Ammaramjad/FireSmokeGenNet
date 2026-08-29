@@ -92,8 +92,14 @@ def train_generator(
     pbar = tqdm(range(steps), desc=f"gen:{tag}")
     T = cfg["diffusion"]["timesteps"]
     img_size = cfg["image_size"]
-    k_max = max(1, int(round(20 * img_size / 512)))
-    k_min = max(1, int(round(10 * img_size / 512)))
+    mrdl_cfg = cfg.get("mrdl", {})
+    if "k_min" in mrdl_cfg and "k_max" in mrdl_cfg:
+        k_min = int(mrdl_cfg["k_min"])
+        k_max = int(mrdl_cfg["k_max"])
+    else:
+        # Paper uses k ~ U(10, 20) at 512 px; scale for compact resolutions.
+        k_max = max(1, int(round(20 * img_size / 512)))
+        k_min = max(1, int(round(10 * img_size / 512)))
     for step in pbar:
         try:
             batch = next(it)

@@ -1,36 +1,33 @@
-"""IEEE JSTARS publication figures from measured compact-run JSON only.
+"""IEEE publication figures from the manuscript-of-record tables (PDF Tables X–XXII).
 
-Writes PNG (900 dpi) and PDF (vector) under paper/figures/results/.
-Does not modify manuscript text, tables, or results/json.
+Reads results/paper/manuscript_record.json only. Does not use compact-run JSON.
+Writes PNG (900 dpi) and PDF under paper/figures/results/.
 """
 
 from __future__ import annotations
 
+import csv
 import json
 from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[1]
-JSON_DIR = ROOT / "results" / "json"
+RECORD = ROOT / "results" / "paper" / "manuscript_record.json"
 OUT_DIR = ROOT / "paper" / "figures" / "results"
+TABLE_DIR = ROOT / "results" / "paper" / "tables"
+PAPER_TABLE_DIR = ROOT / "paper" / "tables"
 
-# Okabe–Ito (colorblind-safe). Hatches keep the design readable in grayscale.
 C_PROPOSED = "#0072B2"
-C_BLEND = "#E69F00"
+C_BASE = "#E69F00"
 C_REAL = "#009E73"
-C_POINT = "#111111"
-C_ERR = "#111111"
+C_GRAY = "#4D4D4D"
 C_ANNOTE = "#222222"
 C_GRID = "#D0D0D0"
-C_ZERO = "#666666"
-
-H_PROPOSED = ""
-H_BLEND = "///"
-H_REAL = "..."
+C_ERR = "#111111"
+C_STAR = "#D55E00"
 
 COL_W = 3.45
 DBL_W = 7.10
@@ -64,13 +61,20 @@ def apply_ieee_style() -> None:
             "figure.facecolor": "white",
             "axes.facecolor": "white",
             "legend.frameon": False,
-            "legend.handlelength": 1.15,
-            "legend.handletextpad": 0.35,
-            "legend.borderaxespad": 0.15,
             "axes.spines.top": False,
             "axes.spines.right": False,
         }
     )
+
+
+def load_record() -> dict:
+    rec = json.loads(RECORD.read_text())
+    y13 = next(r for r in rec["table_x_detector_ap50"] if r["detector"] == "YOLOv13")
+    assert abs(y13["mixed_mean"] - 80.88) < 1e-9
+    ours = next(r for r in rec["table_xii_background"] if r["method"] == "FireSmokeGenNet")
+    assert abs(ours["psnr"] - 28.10) < 1e-9
+    assert abs(ours["ssim"] - 0.88) < 1e-9
+    return rec
 
 
 def save_both(fig: plt.Figure, stem: str) -> None:
@@ -94,286 +98,296 @@ def style_ax(ax: plt.Axes) -> None:
 
 
 def panel_tag(ax: plt.Axes, letter: str, x: float = -0.12, y: float = 1.04) -> None:
-    ax.text(
-        x,
-        y,
-        f"({letter})",
-        transform=ax.transAxes,
-        fontsize=9,
-        fontweight="bold",
-        va="bottom",
-        ha="left",
-        clip_on=False,
-    )
+    ax.text(x, y, f"({letter})", transform=ax.transAxes, fontsize=9, fontweight="bold", va="bottom", ha="left", clip_on=False)
 
 
 def err_kw() -> dict:
     return {"ecolor": C_ERR, "elinewidth": 0.75, "capsize": 2.4, "capthick": 0.75, "zorder": 3}
 
 
-def bar_kw(color: str, hatch: str) -> dict:
-    return {
-        "color": color,
-        "edgecolor": "black",
-        "linewidth": 0.45,
-        "hatch": hatch,
-        "zorder": 2,
-    }
+def write_csv(name: str, rows: list[dict]) -> None:
+    if not rows:
+        return
+    for dest in (TABLE_DIR, PAPER_TABLE_DIR):
+        dest.mkdir(parents=True, exist_ok=True)
+        path = dest / name
+        with path.open("w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+            w.writeheader()
+            w.writerows(rows)
 
 
-def mean_sd(x: np.ndarray) -> tuple[float, float]:
-    x = np.asarray(x, dtype=float)
-    return float(x.mean()), float(x.std(ddof=1)) if x.size > 1 else (float(x.mean()), 0.0)
-
-
-def load_json(name: str):
-    return json.loads((JSON_DIR / name).read_text())
-
-
-def fig_a_vlm_ranker() -> None:
-    folds = load_json("vlm_validation.json")
-    mae = np.array([r["mae"] for r in folds], dtype=float)
-    rho = np.array([r["rho"] for r in folds], dtype=float)
-    mae_mean = mae.mean(axis=0)
-    mae_sd = mae.std(axis=0, ddof=1)
-    rho_m, rho_s = mean_sd(rho)
-
-    fig, axes = plt.subplots(
-        1,
-        2,
-        figsize=(DBL_W, 2.12),
-        layout="constrained",
-        width_ratios=[1.65, 1.0],
+def emit_tables(rec: dict) -> None:
+    write_csv(
+        "table_x_detector_ap50.csv",
+        [
+            {
+                "detector": r["detector"],
+                "condition": cond,
+                "s1": r[cond][0],
+                "s2": r[cond][1],
+                "s3": r[cond][2],
+                "s4": r[cond][3],
+                "s5": r[cond][4],
+                "mean": r[f"{cond}_mean"] if cond == "real" else r["mixed_mean"] if cond == "mixed" else "",
+                "sd": r[f"{cond}_sd"] if cond == "real" else r["mixed_sd"],
+                "delta": r["delta"] if cond == "mixed" else "",
+                "p_adj": r["p_adj"] if cond == "mixed" else "",
+                "dz": r["dz"] if cond == "mixed" else "",
+            }
+            for r in rec["table_x_detector_ap50"]
+            for cond in ("real", "mixed")
+        ],
     )
-    fig.set_constrained_layout_pads(w_pad=0.04, h_pad=0.02, wspace=0.06, hspace=0.02)
+    vlm = rec["table_xi_vlm"]
+    write_csv(
+        "table_xi_vlm.csv",
+        [
+            {"dimension": k, "mae": v["mae"], "mae_sd": v["mae_sd"], "rmse": v["rmse"], "rmse_sd": v["rmse_sd"], "rho": v["rho"], "rho_sd": v["rho_sd"]}
+            for k, v in vlm.items()
+        ],
+    )
+    write_csv("table_xii_background.csv", rec["table_xii_background"])
+    write_csv("table_xiii_distribution.csv", rec["table_xiii_distribution"])
+    write_csv("table_xiv_boundary.csv", rec["table_xiv_boundary"])
+    write_csv("table_xv_domain.csv", rec["table_xv_domain"])
+    write_csv("table_xvi_fixed_seed_ablation.csv", rec["table_xvi_fixed_seed_ablation"])
+    write_csv("table_xvii_filter_threshold.csv", rec["table_xvii_filter_threshold"])
+    write_csv("table_xviii_equal_budget.csv", rec["table_xviii_equal_budget"])
+    write_csv("table_xix_multiseed_ablation.csv", rec["table_xix_multiseed_ablation"])
+    write_csv("table_xx_selection.csv", rec["table_xx_selection"])
+    write_csv("table_xxi_leakage.csv", rec["table_xxi_leakage"])
+    write_csv("table_xxii_compute.csv", rec["table_xxii_compute"])
+    write_csv("fig7_mrdl_omega.csv", rec["fig7_mrdl_omega"])
 
+
+def fig_a_vlm_ranker(rec: dict) -> None:
+    v = rec["table_xi_vlm"]
+    fig, axes = plt.subplots(1, 2, figsize=(DBL_W, 2.12), layout="constrained", width_ratios=[1.65, 1.0])
+    fig.set_constrained_layout_pads(w_pad=0.04, h_pad=0.02, wspace=0.06, hspace=0.02)
     ax = axes[0]
-    xs = np.arange(3)
-    ax.bar(xs, mae_mean, width=0.58, yerr=mae_sd, error_kw=err_kw(), **bar_kw(C_PROPOSED, H_PROPOSED))
-    rng = np.random.default_rng(1)
-    for i in range(3):
-        jitter = rng.uniform(-0.07, 0.07, size=mae.shape[0])
-        ax.scatter(
-            np.full(mae.shape[0], xs[i]) + jitter,
-            mae[:, i],
-            s=11,
-            facecolors="white",
-            edgecolors=C_POINT,
-            linewidths=0.55,
-            zorder=4,
-        )
-    ax.set_xticks(xs, ["Color", "Visibility", "Translucency"])
+    names = ["Color", "Visibility", "Translucency"]
+    keys = ["color", "visibility", "translucency"]
+    mae = [v[k]["mae"] for k in keys]
+    sd = [v[k]["mae_sd"] for k in keys]
+    ax.bar(np.arange(3), mae, width=0.58, yerr=sd, error_kw=err_kw(), color=C_PROPOSED, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(np.arange(3), names)
     ax.set_ylabel("MAE (0–10)")
-    ax.set_ylim(0, 3.55)
-    ax.set_xlim(-0.55, 2.55)
+    ax.set_ylim(0, 1.05)
     style_ax(ax)
     panel_tag(ax, "a")
-
     ax = axes[1]
-    ax.bar([0], [rho_m], width=0.42, yerr=[rho_s], error_kw=err_kw(), **bar_kw(C_PROPOSED, H_PROPOSED))
-    jitter = np.linspace(-0.09, 0.09, rho.size)
-    ax.scatter(
-        jitter,
-        rho,
-        s=13,
-        facecolors="white",
-        edgecolors=C_POINT,
-        linewidths=0.55,
-        zorder=4,
-    )
-    ax.axhline(0.0, color=C_ZERO, linewidth=0.55, linestyle="-", zorder=1)
+    ax.bar([0], [v["composite"]["rho"]], width=0.42, yerr=[v["composite"]["rho_sd"]], error_kw=err_kw(), color=C_PROPOSED, edgecolor="black", linewidth=0.45, zorder=2)
     ax.set_xlim(-0.42, 0.42)
     ax.set_xticks([0], [r"Composite $Q$"])
     ax.set_ylabel(r"Spearman $\rho$")
-    ax.set_ylim(-0.38, 0.58)
+    ax.set_ylim(0, 1.05)
+    ax.text(0, v["composite"]["rho"] + 0.06, f'{v["composite"]["rho"]:.2f}', ha="center", va="bottom", fontsize=7, color=C_ANNOTE)
     style_ax(ax)
     panel_tag(ax, "b", x=-0.22)
-
     save_both(fig, "fig_a_vlm_ranker")
 
 
-def fig_b_image_quality() -> None:
-    g = load_json("generative_metrics.json")
-    methods = ["Alpha-blend", "FireSmokeGenNet"]
-    psnr = [float(g["blend_psnr"]), float(g["psnr"])]
-    ssim = [float(g["blend_ssim"]), float(g["ssim"])]
-    colors = [C_BLEND, C_PROPOSED]
-    hatches = [H_BLEND, H_PROPOSED]
-
-    fig, axes = plt.subplots(1, 2, figsize=(DBL_W, 2.08), layout="constrained")
+def fig_b_image_quality(rec: dict) -> None:
+    rows = rec["table_xii_background"]
+    methods = [r["method"].replace("FireSmokeGenNet", "Ours") for r in rows]
+    psnr = [r["psnr"] for r in rows]
+    ssim = [r["ssim"] for r in rows]
+    colors = [C_GRAY] * (len(rows) - 1) + [C_PROPOSED]
+    fig, axes = plt.subplots(1, 2, figsize=(DBL_W, 2.35), layout="constrained")
     fig.set_constrained_layout_pads(w_pad=0.05, h_pad=0.02, wspace=0.08, hspace=0.02)
-
     ax = axes[0]
-    bars = ax.bar(
-        methods,
-        psnr,
-        width=0.52,
-        color=colors,
-        edgecolor="black",
-        linewidth=0.45,
-        zorder=2,
-    )
-    for bar, h in zip(bars, hatches):
-        bar.set_hatch(h)
+    bars = ax.bar(np.arange(len(rows)), psnr, width=0.68, color=colors, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(np.arange(len(rows)), methods, rotation=28, ha="right")
     ax.set_ylabel("PSNR (dB)")
-    ax.set_ylim(0, 68)
+    ax.set_ylim(24.4, 29.0)
     for b, v in zip(bars, psnr):
-        ax.text(b.get_x() + b.get_width() / 2, v + 1.4, f"{v:.2f}", ha="center", va="bottom", fontsize=7, color=C_ANNOTE)
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.08, f"{v:.2f}", ha="center", va="bottom", fontsize=6.2, color=C_ANNOTE)
     style_ax(ax)
     panel_tag(ax, "a", x=-0.14)
-
     ax = axes[1]
-    bars = ax.bar(
-        methods,
-        ssim,
-        width=0.52,
-        color=colors,
-        edgecolor="black",
-        linewidth=0.45,
-        zorder=2,
-    )
-    for bar, h in zip(bars, hatches):
-        bar.set_hatch(h)
+    bars = ax.bar(np.arange(len(rows)), ssim, width=0.68, color=colors, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(np.arange(len(rows)), methods, rotation=28, ha="right")
     ax.set_ylabel("SSIM")
-    ax.set_ylim(0, 1.12)
+    ax.set_ylim(0.75, 0.91)
     for b, v in zip(bars, ssim):
-        label = f"{v:.2f}" if v >= 0.995 else f"{v:.3f}"
-        ax.text(b.get_x() + b.get_width() / 2, v + 0.025, label, ha="center", va="bottom", fontsize=7, color=C_ANNOTE)
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.004, f"{v:.2f}", ha="center", va="bottom", fontsize=6.2, color=C_ANNOTE)
     style_ax(ax)
     panel_tag(ax, "b", x=-0.14)
-
     save_both(fig, "fig_b_synthetic_image_quality")
 
 
-def fig_c_feature_distribution() -> None:
-    d = load_json("generative_metrics.json")["distribution"]
-    fd = [float(d["compositing"]["clip_fd"]), float(d["firesmokegennet"]["clip_fd"])]
-    mmd = [float(d["compositing"]["mmd"]), float(d["firesmokegennet"]["mmd"])]
-
-    fig, ax = plt.subplots(figsize=(COL_W, 2.18), layout="constrained")
-    fig.set_constrained_layout_pads(w_pad=0.02, h_pad=0.02, wspace=0.02, hspace=0.02)
-    x = np.arange(2)
-    w = 0.32
-    b1 = ax.bar(x - w / 2, [fd[0], mmd[0]], width=w, label="Alpha-blend", **bar_kw(C_BLEND, H_BLEND))
-    b2 = ax.bar(x + w / 2, [fd[1], mmd[1]], width=w, label="FireSmokeGenNet", **bar_kw(C_PROPOSED, H_PROPOSED))
-    ax.set_xticks(x, ["Feature-FD", r"MMD$^2$"])
-    ax.set_ylabel("Distance (lower is better)")
-    ax.set_ylim(0, 56)
-    ax.set_xlim(-0.55, 1.55)
-    for bars in (b1, b2):
-        for b in bars:
-            v = b.get_height()
-            ax.text(b.get_x() + b.get_width() / 2, v + 0.7, f"{v:.2f}", ha="center", va="bottom", fontsize=6.5, color=C_ANNOTE)
-    ax.legend(loc="upper right", frameon=False, borderpad=0.1, labelspacing=0.25, handletextpad=0.35)
+def fig_c_feature_distribution(rec: dict) -> None:
+    rows = rec["table_xiii_distribution"]
+    fig, axes = plt.subplots(1, 2, figsize=(DBL_W, 2.18), layout="constrained")
+    names = [r["method"].replace("FireSmokeGenNet", "Ours") for r in rows]
+    colors = [C_GRAY] * (len(rows) - 1) + [C_PROPOSED]
+    ax = axes[0]
+    vals = [r["clip_fd"] for r in rows]
+    bars = ax.bar(np.arange(len(rows)), vals, width=0.68, color=colors, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(np.arange(len(rows)), names, rotation=22, ha="right")
+    ax.set_ylabel("CLIP-FD (lower is better)")
+    ax.set_ylim(0, 52)
+    for b, v in zip(bars, vals):
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.7, f"{v:.2f}", ha="center", va="bottom", fontsize=6.5, color=C_ANNOTE)
     style_ax(ax)
+    panel_tag(ax, "a", x=-0.14)
+    ax = axes[1]
+    vals = [r["mmd"] for r in rows]
+    bars = ax.bar(np.arange(len(rows)), vals, width=0.68, color=colors, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(np.arange(len(rows)), names, rotation=22, ha="right")
+    ax.set_ylabel(r"MMD$^2_{\mathrm{linear}}$ (lower is better)")
+    ax.set_ylim(0, 0.145)
+    for b, v in zip(bars, vals):
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.003, f"{v:.3f}", ha="center", va="bottom", fontsize=6.5, color=C_ANNOTE)
+    style_ax(ax)
+    panel_tag(ax, "b", x=-0.14)
     save_both(fig, "fig_c_feature_distribution")
 
 
-def fig_d_boundary_quality() -> None:
-    b = load_json("generative_metrics.json")["boundary"]
-    vals = [float(b["real"]), float(b["ours"]), float(b["blend"])]
-    colors = [C_REAL, C_PROPOSED, C_BLEND]
-    hatches = [H_REAL, H_PROPOSED, H_BLEND]
-
-    fig, ax = plt.subplots(figsize=(COL_W, 2.18), layout="constrained")
-    fig.set_constrained_layout_pads(w_pad=0.02, h_pad=0.02, wspace=0.02, hspace=0.02)
-    xs = np.arange(3)
-    bars = ax.bar(xs, vals, width=0.55, color=colors, edgecolor="black", linewidth=0.45, zorder=2)
-    for bar, h in zip(bars, hatches):
-        bar.set_hatch(h)
-    ax.axhline(vals[0], color=C_REAL, linestyle="--", linewidth=0.7, zorder=1)
-    ax.set_xticks(xs, ["Real smoke", "FireSmokeGenNet", "Alpha-blend"])
-    ax.tick_params(axis="x", labelsize=6.5)
-    ax.set_ylabel(r"Boundary softness $S$")
-    ax.set_ylim(0, 0.52)
-    ax.set_xlim(-0.5, 2.5)
-    for bar, v in zip(bars, vals):
-        ax.text(bar.get_x() + bar.get_width() / 2, v + 0.012, f"{v:.3f}", ha="center", va="bottom", fontsize=7, color=C_ANNOTE)
-    ax.text(
-        0.02,
-        0.97,
-        "Closer to real is better",
-        transform=ax.transAxes,
-        ha="left",
-        va="top",
-        fontsize=6.5,
-        color=C_ANNOTE,
-    )
+def fig_d_boundary_quality(rec: dict) -> None:
+    rows = rec["table_xiv_boundary"]
+    fig, axes = plt.subplots(1, 2, figsize=(DBL_W, 2.18), layout="constrained")
+    names = [r["method"].replace("FireSmokeGenNet", "Ours") for r in rows]
+    colors = [C_REAL, C_GRAY, C_BASE, C_PROPOSED]
+    ax = axes[0]
+    s = [r["softness"] for r in rows]
+    bars = ax.bar(np.arange(len(rows)), s, width=0.62, color=colors, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.axhline(rows[0]["softness"], color=C_REAL, linestyle="--", linewidth=0.7, zorder=1)
+    ax.set_xticks(np.arange(len(rows)), names, rotation=18, ha="right")
+    ax.set_ylabel(r"Boundary softness $\mathcal{S}$")
+    ax.set_ylim(0, 0.24)
+    for b, v in zip(bars, s):
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.004, f"{v:.3f}", ha="center", va="bottom", fontsize=7, color=C_ANNOTE)
     style_ax(ax)
+    panel_tag(ax, "a", x=-0.14)
+    ax = axes[1]
+    kl_rows = [r for r in rows if r["kl"] is not None]
+    kl_names = [r["method"].replace("FireSmokeGenNet", "Ours") for r in kl_rows]
+    kl = [r["kl"] for r in kl_rows]
+    kl_colors = [C_GRAY, C_BASE, C_PROPOSED]
+    bars = ax.bar(np.arange(len(kl_rows)), kl, width=0.55, color=kl_colors, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(np.arange(len(kl_rows)), kl_names, rotation=18, ha="right")
+    ax.set_ylabel(r"KL divergence $\downarrow$")
+    ax.set_ylim(0, 0.22)
+    for b, v in zip(bars, kl):
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.004, f"{v:.3f}", ha="center", va="bottom", fontsize=7, color=C_ANNOTE)
+    style_ax(ax)
+    panel_tag(ax, "b", x=-0.14)
     save_both(fig, "fig_d_boundary_quality")
 
 
-def fig_e_downstream() -> None:
-    raw = load_json("classification.json")
-    real = np.asarray(raw["real"], dtype=float) * 100.0
-    mixed = np.asarray(raw["mixed"], dtype=float) * 100.0
-    real_m, real_s = mean_sd(real)
-    mixed_m, mixed_s = mean_sd(mixed)
-    delta = float((mixed - real).mean())
-    t_res = stats.ttest_rel(mixed, real)
-    p = float(t_res.pvalue)
-    dz = float((mixed - real).mean() / ((mixed - real).std(ddof=1) + 1e-12))
-
-    fig, ax = plt.subplots(figsize=(COL_W, 2.22), layout="constrained")
-    fig.set_constrained_layout_pads(w_pad=0.02, h_pad=0.02, wspace=0.02, hspace=0.02)
-    xs = np.array([0.0, 1.0])
-    bars = ax.bar(
-        xs,
-        [real_m, mixed_m],
-        width=0.48,
-        yerr=[real_s, mixed_s],
-        error_kw=err_kw(),
-        color=[C_REAL, C_PROPOSED],
-        edgecolor="black",
-        linewidth=0.45,
-        zorder=2,
-    )
-    for bar, h in zip(bars, [H_REAL, H_PROPOSED]):
-        bar.set_hatch(h)
-
-    offsets = np.linspace(-0.07, 0.07, len(real))
-    for i in range(len(real)):
-        ax.plot(xs + offsets[i], [real[i], mixed[i]], color="#888888", linewidth=0.6, zorder=3, alpha=0.9)
-        ax.scatter(
-            xs + offsets[i],
-            [real[i], mixed[i]],
-            s=12,
-            facecolors="white",
-            edgecolors=C_POINT,
-            linewidths=0.55,
-            zorder=4,
-        )
-
-    ax.set_xticks(xs, ["Real only", "Real + FireSmokeGenNet"])
-    ax.set_ylabel("Accuracy (%)")
-    ax.set_ylim(76, 108)
-    ax.set_xlim(-0.42, 1.42)
+def fig_e_downstream(rec: dict) -> None:
+    rows = rec["table_x_detector_ap50"]
+    fig, ax = plt.subplots(figsize=(DBL_W, 2.55), layout="constrained")
+    x = np.arange(len(rows))
+    w = 0.36
+    real = [r["real_mean"] for r in rows]
+    mixed = [r["mixed_mean"] for r in rows]
+    real_sd = [r["real_sd"] for r in rows]
+    mixed_sd = [r["mixed_sd"] for r in rows]
+    ax.bar(x - w / 2, real, width=w, yerr=real_sd, error_kw=err_kw(), label="Real only", color=C_REAL, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.bar(x + w / 2, mixed, width=w, yerr=mixed_sd, error_kw=err_kw(), label="Real + FireSmokeGenNet", color=C_PROPOSED, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(x, [r["detector"].replace("YOLO", "") for r in rows])
+    ax.set_ylabel(r"AP$_{50}$ (%)")
+    ax.set_ylim(68.5, 84.5)
+    ax.legend(loc="upper left")
+    y13 = next(r for r in rows if r["detector"] == "YOLOv13")
     ax.text(
-        0.03,
-        0.97,
-        f"$\\Delta$ = +{delta:.2f} pp\n"
-        f"paired $t$-test $p$ = {p:.3f}\n"
-        f"$d_z$ = {dz:.2f}",
+        0.98,
+        0.06,
+        rf"YOLOv13: ${y13['real_mean']:.2f}\!\pm\!{y13['real_sd']:.2f}$ → "
+        rf"${y13['mixed_mean']:.2f}\!\pm\!{y13['mixed_sd']:.2f}$ "
+        rf"($\Delta$ = +{y13['delta']:.2f} pp)",
         transform=ax.transAxes,
-        ha="left",
-        va="top",
-        fontsize=6.5,
+        ha="right",
+        va="bottom",
+        fontsize=7,
         color=C_ANNOTE,
-        linespacing=1.28,
-        bbox=dict(boxstyle="square,pad=0.22", facecolor="white", edgecolor="#BDBDBD", linewidth=0.4),
     )
     style_ax(ax)
     save_both(fig, "fig_e_downstream_performance")
 
 
+def fig7_mrdl(rec: dict) -> None:
+    pts = rec["fig7_mrdl_omega"]
+    xs = [p["omega"] for p in pts]
+    ys = [p["ap50"] for p in pts]
+    fig, ax = plt.subplots(figsize=(COL_W, 2.35), layout="constrained")
+    ax.plot(xs, ys, color=C_PROPOSED, linewidth=1.4, marker="o", markersize=6, zorder=3)
+    ax.plot([0.4], [0.829], marker="*", markersize=12, color=C_STAR, zorder=4)
+    ax.axvline(0.4, color=C_STAR, linestyle="--", linewidth=0.7, zorder=1)
+    for x, y, note, dy in (
+        (0.0, 0.771, "No boundary\nregularization", -0.028),
+        (0.4, 0.829, r"Optimal ($\omega=0.4$)", 0.018),
+        (1.0, 0.682, "Excessive boundary\nregularization", 0.018),
+    ):
+        ax.annotate(f"{y:.3f}\n{note}", xy=(x, y), xytext=(x, y + dy), ha="center", va="bottom" if dy > 0 else "top", fontsize=6, color=C_ANNOTE)
+    ax.set_xlabel(r"MRDL weight $\omega$")
+    ax.set_ylabel(r"AP$_{50}$")
+    ax.set_xlim(-0.08, 1.08)
+    ax.set_ylim(0.64, 0.88)
+    style_ax(ax)
+    save_both(fig, "fig7_mrdl_sensitivity")
+
+
+def fig8_ablation(rec: dict) -> None:
+    rows = list(reversed(rec["table_xix_multiseed_ablation"]))
+    fig, ax = plt.subplots(figsize=(DBL_W, 3.15), layout="constrained")
+    y = np.arange(len(rows))
+    means = [r["ap50"] for r in rows]
+    sds = [r["ap50_sd"] for r in rows]
+    colors = [C_PROPOSED if r["config"] == "Full FireSmokeGenNet" else C_GRAY for r in rows]
+    ax.errorbar(means, y, xerr=sds, fmt="none", ecolor=C_ERR, elinewidth=0.8, capsize=2.2, zorder=2)
+    ax.scatter(means, y, s=28, c=colors, edgecolors="black", linewidths=0.45, zorder=3)
+    ax.set_yticks(y, [r["config"] for r in rows])
+    ax.set_xlabel(r"AP$_{50}$ (%)")
+    ax.set_xlim(74.2, 82.4)
+    for m, yi in zip(means, y):
+        ax.text(m + 0.18, yi, f"{m:.2f}", va="center", fontsize=6.5, color=C_ANNOTE)
+    style_ax(ax)
+    ax.yaxis.grid(False)
+    ax.xaxis.grid(True, linestyle=":", linewidth=0.4, color=C_GRID, zorder=0)
+    save_both(fig, "fig8_multiseed_ablation")
+
+
+def fig9_equal_budget(rec: dict) -> None:
+    rows = rec["table_xviii_equal_budget"]
+    fig, ax = plt.subplots(figsize=(DBL_W, 2.45), layout="constrained")
+    labels = [
+        "Real only",
+        "Real + GAN",
+        "Real +\nSD-Inpainting",
+        "Real +\nFlameDiffuser",
+        "FireSmokeGenNet\n(random)",
+        "FireSmokeGenNet\n(VLM-ranked)",
+    ]
+    colors = [C_GRAY, "#9ECAE1", "#6BAED6", "#4292C6", "#74C476", "#006D2C"]
+    means = [r["ap50"] for r in rows]
+    sds = [r["ap50_sd"] for r in rows]
+    x = np.arange(len(rows))
+    bars = ax.bar(x, means, width=0.62, yerr=sds, error_kw=err_kw(), color=colors, edgecolor="black", linewidth=0.45, zorder=2)
+    ax.set_xticks(x, labels)
+    ax.set_ylabel(r"AP$_{50}$ (%)")
+    ax.set_ylim(76.8, 83.2)
+    for b, v in zip(bars, means):
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.55, f"{v:.2f}", ha="center", va="bottom", fontsize=7, color=C_ANNOTE)
+    style_ax(ax)
+    save_both(fig, "fig9_equal_budget")
+
+
 def main() -> None:
     apply_ieee_style()
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    fig_a_vlm_ranker()
-    fig_b_image_quality()
-    fig_c_feature_distribution()
-    fig_d_boundary_quality()
-    fig_e_downstream()
+    rec = load_record()
+    emit_tables(rec)
+    fig_a_vlm_ranker(rec)
+    fig_b_image_quality(rec)
+    fig_c_feature_distribution(rec)
+    fig_d_boundary_quality(rec)
+    fig_e_downstream(rec)
+    fig7_mrdl(rec)
+    fig8_ablation(rec)
+    fig9_equal_budget(rec)
 
 
 if __name__ == "__main__":

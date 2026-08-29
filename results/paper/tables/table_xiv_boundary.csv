@@ -1,0 +1,5 @@
+method,softness,kl
+Real smoke,0.119,
+SD-Inpainting,0.203,0.187
+FlameDiffuser,0.167,0.112
+FireSmokeGenNet,0.124,0.041

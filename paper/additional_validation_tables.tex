@@ -1,0 +1,91 @@
+% Additional validation tables transcribed from the IEEE TAI manuscript
+% (Tables XVIII--XXII). Values match results/paper/manuscript_record.json.
+
+\begin{table*}[t]
+\centering
+\caption{Equal-budget downstream comparison using 28,800 synthetic training images from each generator. Results are formatted as five matched YOLOv13 runs.}
+\label{tab:equal_budget_generators}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Training source & AP$_{50}$ (\%) & AP$_{50:95}$ (\%) & Precision (\%) & Recall (\%) & 95\% CI for AP$_{50}$ \\
+\midrule
+Real only & $78.16\pm0.27$ & $48.60\pm0.35$ & $81.20\pm0.42$ & $72.40\pm0.51$ & $[77.82, 78.50]$ \\
+Real + GAN & $79.02\pm0.45$ & $50.20\pm0.48$ & $82.10\pm0.50$ & $73.90\pm0.62$ & $[78.46, 79.58]$ \\
+Real + SD-Inpainting & $79.46\pm0.52$ & $50.87\pm0.55$ & $82.55\pm0.48$ & $74.62\pm0.58$ & $[78.81, 80.11]$ \\
+Real + FlameDiffuser & $80.03\pm0.48$ & $51.64\pm0.51$ & $83.16\pm0.45$ & $75.31\pm0.55$ & $[79.43, 80.63]$ \\
+Real + FireSmokeGenNet, random & $80.21\pm0.61$ & $52.12\pm0.63$ & $83.58\pm0.52$ & $75.74\pm0.66$ & $[79.45, 80.97]$ \\
+Real + FireSmokeGenNet, VLM-ranked & $80.88\pm0.70$ & $53.10\pm0.68$ & $84.70\pm0.57$ & $76.30\pm0.71$ & $[80.01, 81.75]$ \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{Five-seed component and regularization comparison using YOLOv13 under identical partitions and training settings.}
+\label{tab:multiseed_component_validation}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Configuration & AP$_{50}$ (\%) & AP$_{50:95}$ (\%) & Precision (\%) & Recall (\%) & $\Delta$AP$_{50}$ \\
+\midrule
+Full FireSmokeGenNet & $80.88\pm0.70$ & $53.10\pm0.68$ & $84.70\pm0.57$ & $76.30\pm0.71$ & -- \\
+Without MRDL & $77.18\pm0.74$ & $42.95\pm0.71$ & $79.62\pm0.69$ & $71.83\pm0.77$ & $-3.70$ \\
+Standard consistency loss & $78.36\pm0.68$ & $46.72\pm0.65$ & $81.08\pm0.61$ & $72.96\pm0.70$ & $-2.52$ \\
+Boundary-weighted loss & $79.04\pm0.66$ & $48.85\pm0.64$ & $82.14\pm0.58$ & $73.88\pm0.68$ & $-1.84$ \\
+Gradient loss & $78.71\pm0.72$ & $47.96\pm0.70$ & $81.72\pm0.64$ & $73.42\pm0.73$ & $-2.17$ \\
+Dilation-only MRDL & $79.46\pm0.69$ & $50.12\pm0.66$ & $82.83\pm0.60$ & $74.56\pm0.71$ & $-1.42$ \\
+Erosion-only MRDL & $79.29\pm0.71$ & $49.76\pm0.69$ & $82.51\pm0.63$ & $74.31\pm0.72$ & $-1.59$ \\
+Conventional cross-attention & $76.02\pm0.79$ & $41.38\pm0.76$ & $78.35\pm0.71$ & $70.44\pm0.81$ & $-4.86$ \\
+Concatenation fusion & $75.61\pm0.82$ & $40.64\pm0.80$ & $77.92\pm0.75$ & $69.86\pm0.84$ & $-5.27$ \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\begin{table}[t]
+\centering
+\caption{Equal-size synthetic-sample selection comparison; each condition contributes 28,800 images.}
+\label{tab:equal_size_vlm_selection}
+\begin{tabular}{lcc}
+\toprule
+Selection strategy & AP$_{50}$ & Recall \\
+\midrule
+Random selection & $80.21\pm0.61$ & $75.74\pm0.66$ \\
+Bottom-ranked by VLM & $78.92\pm0.73$ & $72.81\pm0.78$ \\
+Rule-based filtering & $80.02\pm0.64$ & $75.36\pm0.69$ \\
+Top-ranked by VLM & $80.88\pm0.70$ & $76.30\pm0.71$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Dataset leakage-audit summary.}
+\label{tab:leakage_audit_results}
+\begin{tabular}{lrr}
+\toprule
+Audit category & Detected & Removed \\
+\midrule
+Exact duplicates & 184 & 184 \\
+Near-duplicate images & 627 & 627 \\
+Shared source scenes/videos & 0 & 0 \\
+Shared background identifiers & 0 & 0 \\
+Shared mask-source identifiers & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Computational characteristics at $512\times512$ resolution.}
+\label{tab:computational_characteristics}
+\begin{tabular}{lcccc}
+\toprule
+Method & Parameters & FLOPs & Peak memory & Time/image \\
+\midrule
+SD-Inpainting & 865 M & 210 G & 14.8 GB & 1.6 s \\
+FlameDiffuser & 910 M & 238 G & 17.2 GB & 1.9 s \\
+FireSmokeGenNet & 1.05 B & 286 G & 22.6 GB & 2.0 s \\
+\bottomrule
+\end{tabular}
+\end{table}

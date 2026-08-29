@@ -1,0 +1,233 @@
+{
+  "source": "Transcribed from the submitted IEEE TAI manuscript FireSmokeGenNet (compiled PDF TAI__11__). These are the paper-of-record numbers. They were not re-measured on this CPU host.",
+  "headline": {
+    "yolov13_real_ap50_pct": 78.16,
+    "yolov13_real_sd": 0.27,
+    "yolov13_mixed_ap50_pct": 80.88,
+    "yolov13_mixed_sd": 0.70,
+    "delta_pp": 2.72,
+    "mixed_ci95": [80.01, 81.75],
+    "psnr_dB": 28.10,
+    "ssim": 0.88
+  },
+  "table_ii_splits": {
+    "training": {"sources": 480, "real_smoke": 12000, "real_nonsmoke": 12000, "real_total": 24000, "synthetic_smoke": 28800, "total": 52800},
+    "validation": {"sources": 60, "real_smoke": 1500, "real_nonsmoke": 1500, "real_total": 3000, "synthetic_smoke": 0, "total": 3000},
+    "test": {"sources": 60, "real_smoke": 1500, "real_nonsmoke": 1500, "real_total": 3000, "synthetic_smoke": 0, "total": 3000},
+    "total": {"sources": 600, "real_smoke": 15000, "real_nonsmoke": 15000, "real_total": 30000, "synthetic_smoke": 28800, "total": 58800}
+  },
+  "table_iii_masks": {
+    "FLAME": {"extracted": 43000, "excluded": 3000, "retained": 40000},
+    "HPWREN": {"extracted": 16500, "excluded": 1500, "retained": 15000},
+    "SMOKE5K": {"extracted": 5500, "excluded": 500, "retained": 5000},
+    "Total": {"extracted": 65000, "excluded": 5000, "retained": 60000}
+  },
+  "table_iv_generation": {
+    "eligible_backgrounds": 8000,
+    "available_smoke_masks": 60000,
+    "masks_sampled_per_background": 3,
+    "background_mask_pairs": 24000,
+    "stochastic_variations_per_pair": 4,
+    "generated_candidate_images": 96000,
+    "vlm_retention_proportion": 0.30,
+    "retained_synthetic_images": 28800
+  },
+  "table_v_domain_splits": [
+    {"shift": "Summer -> Winter", "train_images": 9600, "train_sources": 192, "test_images": 3000, "test_sources": 60},
+    {"shift": "Day -> Dusk", "train_images": 14400, "train_sources": 288, "test_images": 3750, "test_sources": 75},
+    {"shift": "Clear -> Haze/Fog", "train_images": 12000, "train_sources": 240, "test_images": 6000, "test_sources": 120}
+  ],
+  "table_vi_generator": {
+    "optimizer": "AdamW",
+    "betas": [0.9, 0.999],
+    "lr": 1e-4,
+    "schedule": "cosine decay",
+    "warmup_iterations": 1000,
+    "weight_decay": 1e-2,
+    "batch_size": 32,
+    "training_iterations": 20000,
+    "precision": "FP16",
+    "gradient_checkpointing": true,
+    "ema_decay": 0.9999,
+    "omega": 0.4
+  },
+  "table_vii_detector": {
+    "input_resolution": 640,
+    "optimizer": "AdamW",
+    "lr": 1e-3,
+    "batch_size": 16,
+    "max_epochs": 200,
+    "warmup_epochs": 3,
+    "weight_decay": 5e-4,
+    "early_stopping_patience": 30,
+    "conf_threshold": 0.25,
+    "nms_iou": 0.45
+  },
+  "table_viii_inference": {
+    "sampler": "DDIM",
+    "steps": 50,
+    "cfg": 7.5,
+    "development_seed": 42,
+    "resolution": 512
+  },
+  "table_x_detector_ap50": [
+    {
+      "detector": "YOLOv6",
+      "real": [70.8, 71.2, 70.5, 71.0, 70.9],
+      "mixed": [73.0, 74.6, 72.4, 74.1, 73.3],
+      "real_mean": 70.88, "real_sd": 0.26, "real_ci": [70.56, 71.20],
+      "mixed_mean": 73.48, "mixed_sd": 0.88, "mixed_ci": [72.39, 74.57],
+      "delta": 2.60, "test": "Paired t", "p_adj": 0.0022, "dz": 4.14
+    },
+    {
+      "detector": "YOLOv7",
+      "real": [72.1, 72.5, 71.9, 72.4, 72.2],
+      "mixed": [74.0, 75.7, 74.5, 74.6, 75.3],
+      "real_mean": 72.22, "real_sd": 0.24, "real_ci": [71.92, 72.52],
+      "mixed_mean": 74.82, "mixed_sd": 0.68, "mixed_ci": [73.98, 75.66],
+      "delta": 2.60, "test": "Paired t", "p_adj": 0.0021, "dz": 4.63
+    },
+    {
+      "detector": "YOLOv8",
+      "real": [74.0, 74.4, 73.8, 74.2, 74.5],
+      "mixed": [76.8, 76.5, 77.0, 76.7, 77.8],
+      "real_mean": 74.18, "real_sd": 0.29, "real_ci": [73.82, 74.54],
+      "mixed_mean": 76.96, "mixed_sd": 0.50, "mixed_ci": [76.34, 77.58],
+      "delta": 2.78, "test": "Paired t", "p_adj": 0.0019, "dz": 5.59
+    },
+    {
+      "detector": "YOLOv9",
+      "real": [75.2, 75.6, 75.0, 75.5, 75.3],
+      "mixed": [77.3, 78.9, 77.8, 77.4, 78.5],
+      "real_mean": 75.32, "real_sd": 0.24, "real_ci": [75.02, 75.62],
+      "mixed_mean": 77.98, "mixed_sd": 0.70, "mixed_ci": [77.11, 78.85],
+      "delta": 2.66, "test": "Paired t", "p_adj": 0.0022, "dz": 4.19
+    },
+    {
+      "detector": "YOLOv10",
+      "real": [76.0, 76.5, 75.8, 76.3, 76.2],
+      "mixed": [78.6, 78.3, 79.0, 78.4, 79.5],
+      "real_mean": 76.16, "real_sd": 0.27, "real_ci": [75.82, 76.50],
+      "mixed_mean": 78.76, "mixed_sd": 0.49, "mixed_ci": [78.15, 79.37],
+      "delta": 2.60, "test": "Paired t", "p_adj": 0.0022, "dz": 3.94
+    },
+    {
+      "detector": "YOLOv11",
+      "real": [76.8, 77.2, 76.5, 77.0, 77.1],
+      "mixed": [79.0, 80.4, 79.2, 79.0, 80.0],
+      "real_mean": 76.92, "real_sd": 0.28, "real_ci": [76.58, 77.26],
+      "mixed_mean": 79.52, "mixed_sd": 0.64, "mixed_ci": [78.72, 80.32],
+      "delta": 2.60, "test": "Paired t", "p_adj": 0.0021, "dz": 5.25
+    },
+    {
+      "detector": "YOLOv12",
+      "real": [77.3, 77.8, 77.1, 77.6, 77.5],
+      "mixed": [79.9, 80.0, 80.4, 79.7, 80.7],
+      "real_mean": 77.46, "real_sd": 0.27, "real_ci": [77.12, 77.80],
+      "mixed_mean": 80.14, "mixed_sd": 0.40, "mixed_ci": [79.64, 80.64],
+      "delta": 2.68, "test": "Paired t", "p_adj": 0.0021, "dz": 4.84
+    },
+    {
+      "detector": "YOLOv13",
+      "real": [78.0, 78.5, 77.8, 78.3, 78.2],
+      "mixed": [80.1, 81.8, 80.5, 80.6, 81.4],
+      "real_mean": 78.16, "real_sd": 0.27, "real_ci": [77.82, 78.50],
+      "mixed_mean": 80.88, "mixed_sd": 0.70, "mixed_ci": [80.01, 81.75],
+      "delta": 2.72, "test": "Paired t", "p_adj": 0.0021, "dz": 5.12
+    }
+  ],
+  "table_xi_vlm": {
+    "color": {"mae": 0.62, "mae_sd": 0.08, "rmse": 0.79, "rmse_sd": 0.10, "rho": 0.76, "rho_sd": 0.06},
+    "visibility": {"mae": 0.57, "mae_sd": 0.07, "rmse": 0.73, "rmse_sd": 0.09, "rho": 0.81, "rho_sd": 0.05},
+    "translucency": {"mae": 0.71, "mae_sd": 0.10, "rmse": 0.91, "rmse_sd": 0.12, "rho": 0.69, "rho_sd": 0.08},
+    "composite": {"mae": 0.53, "mae_sd": 0.06, "rmse": 0.68, "rmse_sd": 0.08, "rho": 0.83, "rho_sd": 0.04}
+  },
+  "table_xii_background": [
+    {"method": "Stable Diffusion", "psnr": 25.10, "ssim": 0.78, "lpips1": 0.87, "clip_sim": 0.251},
+    {"method": "PowerPaint", "psnr": 25.60, "ssim": 0.80, "lpips1": 0.89, "clip_sim": 0.253},
+    {"method": "SD-Inpainting", "psnr": 26.00, "ssim": 0.81, "lpips1": 0.90, "clip_sim": 0.255},
+    {"method": "BLD", "psnr": 26.30, "ssim": 0.83, "lpips1": 0.91, "clip_sim": 0.254},
+    {"method": "FlameDiffuser", "psnr": 27.10, "ssim": 0.85, "lpips1": 0.91, "clip_sim": 0.256},
+    {"method": "FireSmokeGenNet", "psnr": 28.10, "ssim": 0.88, "lpips1": 0.92, "clip_sim": 0.258}
+  ],
+  "table_xiii_distribution": [
+    {"method": "GAN-based synthesis", "clip_fd": 45.32, "mmd": 0.124},
+    {"method": "Vanilla SD-inpainting", "clip_fd": 38.47, "mmd": 0.098},
+    {"method": "FlameDiffuser", "clip_fd": 32.15, "mmd": 0.081},
+    {"method": "FireSmokeGenNet", "clip_fd": 28.15, "mmd": 0.062}
+  ],
+  "table_xiv_boundary": [
+    {"method": "Real smoke", "softness": 0.119, "kl": null},
+    {"method": "SD-Inpainting", "softness": 0.203, "kl": 0.187},
+    {"method": "FlameDiffuser", "softness": 0.167, "kl": 0.112},
+    {"method": "FireSmokeGenNet", "softness": 0.124, "kl": 0.041}
+  ],
+  "table_xv_domain": [
+    {"shift": "Summer -> Winter", "real_ap50": 0.412, "real_ap50_sd": 0.023, "real_rec": 0.385, "real_rec_sd": 0.021, "mixed_ap50": 0.587, "mixed_ap50_sd": 0.018, "mixed_rec": 0.542, "mixed_rec_sd": 0.019},
+    {"shift": "Day -> Dusk", "real_ap50": 0.385, "real_ap50_sd": 0.031, "real_rec": 0.352, "real_rec_sd": 0.027, "mixed_ap50": 0.542, "mixed_ap50_sd": 0.022, "mixed_rec": 0.498, "mixed_rec_sd": 0.020},
+    {"shift": "Clear -> Haze/Fog", "real_ap50": 0.338, "real_ap50_sd": 0.028, "real_rec": 0.306, "real_rec_sd": 0.024, "mixed_ap50": 0.496, "mixed_ap50_sd": 0.025, "mixed_rec": 0.458, "mixed_rec_sd": 0.021}
+  ],
+  "table_xvi_fixed_seed_ablation": [
+    {"config": "No JCA (CA only)", "ap50": 0.758, "ap5095": 0.412, "prec": 0.781, "rec": 0.702},
+    {"config": "No MRDL (omega=0)", "ap50": 0.771, "ap5095": 0.428, "prec": 0.795, "rec": 0.715},
+    {"config": "ResNet-50 without ImageNet pretraining", "ap50": 0.735, "ap5095": 0.389, "prec": 0.748, "rec": 0.681},
+    {"config": "Unfiltered candidate pool", "ap50": 0.748, "ap5095": 0.412, "prec": 0.761, "rec": 0.698},
+    {"config": "Full FireSmokeGenNet", "ap50": 0.829, "ap5095": 0.531, "prec": 0.847, "rec": 0.763}
+  ],
+  "table_xvii_filter_threshold": [
+    {"retention": "10%", "dataset_size": 9600, "ap50": 0.812, "recall": 0.741},
+    {"retention": "20%", "dataset_size": 19200, "ap50": 0.821, "recall": 0.752},
+    {"retention": "30%", "dataset_size": 28800, "ap50": 0.829, "recall": 0.763},
+    {"retention": "40%", "dataset_size": 38400, "ap50": 0.818, "recall": 0.751},
+    {"retention": "50%", "dataset_size": 48000, "ap50": 0.805, "recall": 0.738},
+    {"retention": "No filtering", "dataset_size": 96000, "ap50": 0.748, "recall": 0.698}
+  ],
+  "fig7_mrdl_omega": [
+    {"omega": 0.0, "ap50": 0.771},
+    {"omega": 0.4, "ap50": 0.829},
+    {"omega": 1.0, "ap50": 0.682}
+  ],
+  "table_xviii_equal_budget": [
+    {"source": "Real only", "ap50": 78.16, "ap50_sd": 0.27, "ap5095": 48.60, "ap5095_sd": 0.35, "prec": 81.20, "prec_sd": 0.42, "rec": 72.40, "rec_sd": 0.51, "ci": [77.82, 78.50]},
+    {"source": "Real + GAN", "ap50": 79.02, "ap50_sd": 0.45, "ap5095": 50.20, "ap5095_sd": 0.48, "prec": 82.10, "prec_sd": 0.50, "rec": 73.90, "rec_sd": 0.62, "ci": [78.46, 79.58]},
+    {"source": "Real + SD-Inpainting", "ap50": 79.46, "ap50_sd": 0.52, "ap5095": 50.87, "ap5095_sd": 0.55, "prec": 82.55, "prec_sd": 0.48, "rec": 74.62, "rec_sd": 0.58, "ci": [78.81, 80.11]},
+    {"source": "Real + FlameDiffuser", "ap50": 80.03, "ap50_sd": 0.48, "ap5095": 51.64, "ap5095_sd": 0.51, "prec": 83.16, "prec_sd": 0.45, "rec": 75.31, "rec_sd": 0.55, "ci": [79.43, 80.63]},
+    {"source": "Real + FireSmokeGenNet, random", "ap50": 80.21, "ap50_sd": 0.61, "ap5095": 52.12, "ap5095_sd": 0.63, "prec": 83.58, "prec_sd": 0.52, "rec": 75.74, "rec_sd": 0.66, "ci": [79.45, 80.97]},
+    {"source": "Real + FireSmokeGenNet, VLM-ranked", "ap50": 80.88, "ap50_sd": 0.70, "ap5095": 53.10, "ap5095_sd": 0.68, "prec": 84.70, "prec_sd": 0.57, "rec": 76.30, "rec_sd": 0.71, "ci": [80.01, 81.75]}
+  ],
+  "table_xix_multiseed_ablation": [
+    {"config": "Full FireSmokeGenNet", "ap50": 80.88, "ap50_sd": 0.70, "ap5095": 53.10, "ap5095_sd": 0.68, "prec": 84.70, "prec_sd": 0.57, "rec": 76.30, "rec_sd": 0.71, "delta": 0.00},
+    {"config": "Without MRDL", "ap50": 77.18, "ap50_sd": 0.74, "ap5095": 42.95, "ap5095_sd": 0.71, "prec": 79.62, "prec_sd": 0.69, "rec": 71.83, "rec_sd": 0.77, "delta": -3.70},
+    {"config": "Standard consistency loss", "ap50": 78.36, "ap50_sd": 0.68, "ap5095": 46.72, "ap5095_sd": 0.65, "prec": 81.08, "prec_sd": 0.61, "rec": 72.96, "rec_sd": 0.70, "delta": -2.52},
+    {"config": "Boundary-weighted loss", "ap50": 79.04, "ap50_sd": 0.66, "ap5095": 48.85, "ap5095_sd": 0.64, "prec": 82.14, "prec_sd": 0.58, "rec": 73.88, "rec_sd": 0.68, "delta": -1.84},
+    {"config": "Gradient loss", "ap50": 78.71, "ap50_sd": 0.72, "ap5095": 47.96, "ap5095_sd": 0.70, "prec": 81.72, "prec_sd": 0.64, "rec": 73.42, "rec_sd": 0.73, "delta": -2.17},
+    {"config": "Dilation-only MRDL", "ap50": 79.46, "ap50_sd": 0.69, "ap5095": 50.12, "ap5095_sd": 0.66, "prec": 82.83, "prec_sd": 0.60, "rec": 74.56, "rec_sd": 0.71, "delta": -1.42},
+    {"config": "Erosion-only MRDL", "ap50": 79.29, "ap50_sd": 0.71, "ap5095": 49.76, "ap5095_sd": 0.69, "prec": 82.51, "prec_sd": 0.63, "rec": 74.31, "rec_sd": 0.72, "delta": -1.59},
+    {"config": "Conventional cross-attention", "ap50": 76.02, "ap50_sd": 0.79, "ap5095": 41.38, "ap5095_sd": 0.76, "prec": 78.35, "prec_sd": 0.71, "rec": 70.44, "rec_sd": 0.81, "delta": -4.86},
+    {"config": "Concatenation fusion", "ap50": 75.61, "ap50_sd": 0.82, "ap5095": 40.64, "ap5095_sd": 0.80, "prec": 77.92, "prec_sd": 0.75, "rec": 69.86, "rec_sd": 0.84, "delta": -5.27}
+  ],
+  "table_xx_selection": [
+    {"strategy": "Random selection", "ap50": 80.21, "ap50_sd": 0.61, "recall": 75.74, "recall_sd": 0.66},
+    {"strategy": "Bottom-ranked by VLM", "ap50": 78.92, "ap50_sd": 0.73, "recall": 72.81, "recall_sd": 0.78},
+    {"strategy": "Rule-based filtering", "ap50": 80.02, "ap50_sd": 0.64, "recall": 75.36, "recall_sd": 0.69},
+    {"strategy": "Top-ranked by VLM", "ap50": 80.88, "ap50_sd": 0.70, "recall": 76.30, "recall_sd": 0.71}
+  ],
+  "table_xxi_leakage": [
+    {"category": "Exact duplicates", "detected": 184, "removed": 184},
+    {"category": "Near-duplicate images", "detected": 627, "removed": 627},
+    {"category": "Shared source scenes/videos", "detected": 0, "removed": 0},
+    {"category": "Shared background identifiers", "detected": 0, "removed": 0},
+    {"category": "Shared mask-source identifiers", "detected": 0, "removed": 0}
+  ],
+  "table_xxii_compute": [
+    {"method": "SD-Inpainting", "params_M": 865, "flops_G": 210, "peak_gb": 14.8, "time_s": 1.6},
+    {"method": "FlameDiffuser", "params_M": 910, "flops_G": 238, "peak_gb": 17.2, "time_s": 1.9},
+    {"method": "FireSmokeGenNet", "params_M": 1050, "flops_G": 286, "peak_gb": 22.6, "time_s": 2.0}
+  ],
+  "quality": {
+    "weights": [0.4, 0.4, 0.2],
+    "icc": 0.82,
+    "annotation_n": 150,
+    "annotators": 3
+  }
+}
