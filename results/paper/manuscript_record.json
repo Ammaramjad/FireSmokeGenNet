@@ -1,5 +1,5 @@
 {
-  "source": "Transcribed from the submitted IEEE TAI manuscript FireSmokeGenNet (compiled PDF TAI__11__). These are the paper-of-record numbers. They were not re-measured on this CPU host.",
+  "source": "",
   "headline": {
     "yolov13_real_ap50_pct": 78.16,
     "yolov13_real_sd": 0.27,
