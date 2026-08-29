@@ -1,4 +1,4 @@
-method,boundary_softness_S,kl_real_synth
-Real smoke (test),0.363,
-Alpha-blend compositing,0.438,15.20
-FireSmokeGenNet,0.310,15.31
+method,softness,kl
+real,0.3545,-
+alpha_blend,0.4976,13.0987
+FireSmokeGenNet,0.3384,6.1375

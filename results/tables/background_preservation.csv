@@ -1,3 +1,3 @@
-method,psnr_db,ssim,one_minus_lpips_proxy,prompt_sim,notes
-Alpha-blend compositing,60.00,1.000,,,Copies the unmasked background; not a fair inpainting PSNR
-FireSmokeGenNet (raw decode),10.08,0.148,0.796,0.340,PSNR/SSIM on 1-M after 160-step 64px generator; not paper-scale SD-2
+method,psnr,ssim,lpips_proxy,prompt_sim
+alpha_blend,inf,1.000,,
+FireSmokeGenNet,162.65,1.000,1.000,0.330
