@@ -1,0 +1,4 @@
+shift,real_ap50,real_ap50_sd,real_rec,real_rec_sd,mixed_ap50,mixed_ap50_sd,mixed_rec,mixed_rec_sd
+Summer -> Winter,0.412,0.023,0.385,0.021,0.587,0.018,0.542,0.019
+Day -> Dusk,0.385,0.031,0.352,0.027,0.542,0.022,0.498,0.02
+Clear -> Haze/Fog,0.338,0.028,0.306,0.024,0.496,0.025,0.458,0.021

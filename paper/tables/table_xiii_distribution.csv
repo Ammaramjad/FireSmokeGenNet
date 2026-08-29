@@ -1,0 +1,5 @@
+method,clip_fd,mmd
+GAN-based synthesis,45.32,0.124
+Vanilla SD-inpainting,38.47,0.098
+FlameDiffuser,32.15,0.081
+FireSmokeGenNet,28.15,0.062

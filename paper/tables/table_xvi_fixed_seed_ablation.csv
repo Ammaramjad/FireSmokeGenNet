@@ -1,0 +1,6 @@
+config,ap50,ap5095,prec,rec
+No JCA (CA only),0.758,0.412,0.781,0.702
+No MRDL (omega=0),0.771,0.428,0.795,0.715
+ResNet-50 without ImageNet pretraining,0.735,0.389,0.748,0.681
+Unfiltered candidate pool,0.748,0.412,0.761,0.698
+Full FireSmokeGenNet,0.829,0.531,0.847,0.763

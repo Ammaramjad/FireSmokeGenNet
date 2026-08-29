@@ -1,0 +1,4 @@
+method,params_M,flops_G,peak_gb,time_s
+SD-Inpainting,865,210,14.8,1.6
+FlameDiffuser,910,238,17.2,1.9
+FireSmokeGenNet,1050,286,22.6,2.0

@@ -1,0 +1,5 @@
+strategy,ap50,ap50_sd,recall,recall_sd
+Random selection,80.21,0.61,75.74,0.66
+Bottom-ranked by VLM,78.92,0.73,72.81,0.78
+Rule-based filtering,80.02,0.64,75.36,0.69
+Top-ranked by VLM,80.88,0.7,76.3,0.71
