@@ -1,0 +1,5 @@
+partition,sources_approx,real_smoke
+train,,71
+val,,16
+test,,19
+backgrounds,,90

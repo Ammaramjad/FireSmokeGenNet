@@ -1,0 +1,266 @@
+[
+  {
+    "detector": "yolov6",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  },
+  {
+    "detector": "yolov7",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  },
+  {
+    "detector": "yolov8",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  },
+  {
+    "detector": "yolov9",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  },
+  {
+    "detector": "yolov10",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  },
+  {
+    "detector": "yolov11",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  },
+  {
+    "detector": "yolov12",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  },
+  {
+    "detector": "yolov13",
+    "real_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mixed_seeds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "real_mean": 0.0,
+    "real_sd": 0.0,
+    "real_ci": [
+      0.0,
+      0.0
+    ],
+    "mixed_mean": 0.0,
+    "mixed_sd": 0.0,
+    "mixed_ci": [
+      0.0,
+      0.0
+    ],
+    "delta": 0.0,
+    "p": NaN,
+    "dz": 0.0,
+    "p_adj": 1.0
+  }
+]

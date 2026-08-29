@@ -1,0 +1,76 @@
+# Hyperparameters as reported in the FireSmokeGenNet paper.
+# Full-scale training requires an 80 GB A100 (or equivalent).
+experiment_name: paper
+seed: 42
+image_size: 512
+latent_size: 64
+vae_channels: 4
+vae_downsample: 8
+
+unet:
+  channels: [320, 640, 1280, 1280]
+  attention_resolutions: [8]
+  num_res_blocks: 2
+
+encoders:
+  mask_backbone: resnet18
+  image_backbone: resnet50
+  freeze: true
+  pretrained: true
+
+diffusion:
+  timesteps: 1000
+  schedule: cosine
+  cosine_s: 0.008
+  beta_max: 0.999
+  mrdl_weight: 0.4
+  cfg_dropout: 0.1
+
+train_generator:
+  optimizer: adamw
+  betas: [0.9, 0.999]
+  lr: 1.0e-4
+  weight_decay: 0.01
+  batch_size: 32
+  iterations: 20000
+  warmup: 1000
+  ema_decay: 0.9999
+  precision: fp16
+
+inference:
+  sampler: ddim
+  steps: 50
+  guidance_scale: 7.5
+  resolution: 512
+
+quality:
+  weights: [0.4, 0.4, 0.2]
+  retain_fraction: 0.30
+  annotation_size: 150
+  lora_rank: 16
+  lora_lr: 1.0e-4
+  lora_epochs: 10
+  vlm: Qwen2-VL-7B-Instruct
+
+detector:
+  families: [yolov6, yolov7, yolov8, yolov9, yolov10, yolov11, yolov12, yolov13]
+  input_size: 640
+  optimizer: adamw
+  lr: 1.0e-3
+  batch_size: 16
+  epochs: 200
+  warmup_epochs: 3
+  weight_decay: 5.0e-4
+  patience: 30
+  conf_threshold: 0.25
+  nms_iou: 0.45
+  seeds: [42, 123, 3407, 2025, 2026]
+
+dataset:
+  real_train: 24000
+  real_val: 3000
+  real_test: 3000
+  backgrounds: 8000
+  masks: 60000
+  generated_candidates: 96000
+  retained_synthetic: 28800

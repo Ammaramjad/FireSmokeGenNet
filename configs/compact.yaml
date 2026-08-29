@@ -1,0 +1,88 @@
+# CPU-runnable reproduction of the FireSmokeGenNet methodology.
+# Equations, modules, splits, metrics, and evaluation protocol match the paper;
+# capacity, image size, and sample counts are reduced so the pipeline can finish
+# on a 4-core CPU with ~15 GB RAM.
+experiment_name: compact
+seed: 42
+image_size: 64
+latent_size: 16
+vae_channels: 4
+vae_downsample: 4
+device: cpu
+num_workers: 0
+
+unet:
+  channels: [64, 128, 192, 192]
+  attention_resolutions: [4]
+  num_res_blocks: 1
+
+encoders:
+  mask_backbone: resnet18
+  image_backbone: resnet18
+  freeze: true
+  pretrained: true
+
+diffusion:
+  timesteps: 100
+  schedule: cosine
+  cosine_s: 0.008
+  beta_max: 0.999
+  mrdl_weight: 0.4
+  cfg_dropout: 0.1
+
+train_vae:
+  lr: 2.0e-4
+  batch_size: 8
+  iterations: 80
+  kl_weight: 1.0e-4
+
+train_generator:
+  optimizer: adamw
+  betas: [0.9, 0.999]
+  lr: 1.0e-4
+  weight_decay: 0.01
+  batch_size: 4
+  iterations: 160
+  warmup: 20
+  ema_decay: 0.999
+  precision: fp32
+  ablation_iterations: 70
+
+inference:
+  sampler: ddim
+  steps: 8
+  guidance_scale: 7.5
+  resolution: 64
+
+quality:
+  weights: [0.4, 0.4, 0.2]
+  retain_fraction: 0.30
+  annotation_size: 80
+  mlp_hidden: 64
+  mlp_epochs: 40
+
+data:
+  max_smoke_images: 280
+  max_backgrounds: 90
+  max_masks: 220
+  candidates_per_pair: 2
+  pairs: 48
+  detector_smoke: 140
+  detector_nonsmoke: 140
+
+detector:
+  families: [yolov6, yolov7, yolov8, yolov9, yolov10, yolov11, yolov12, yolov13]
+  input_size: 128
+  lr: 1.0e-3
+  batch_size: 8
+  epochs: 18
+  warmup_epochs: 1
+  weight_decay: 5.0e-4
+  conf_threshold: 0.10
+  nms_iou: 0.45
+  seeds: [42, 123, 3407, 2025, 2026]
+  grid_size: 8
+
+dataset_sources:
+  smoke: pyronear/pyro-sdis
+  backgrounds: wikimedia-commons-cc

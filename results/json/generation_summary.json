@@ -1,0 +1,8 @@
+{
+  "eligible_backgrounds": 90,
+  "available_masks": 74,
+  "pairs": 48,
+  "candidates": 96,
+  "retained": 29,
+  "retain_fraction": 0.3
+}
