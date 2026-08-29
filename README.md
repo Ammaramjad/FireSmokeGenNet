@@ -43,17 +43,17 @@ Full-scale paper settings live in `configs/paper.yaml` (512px, SD-2-sized U-Net,
 
 ## Results
 
-Compact public-data numbers, claim-by-claim, live in [`results/RESULTS.md`](results/RESULTS.md). Tables are under `results/tables/`, figures under `results/figures/`.
+The manuscript **Results** section (IEEE Section IV) is rewritten from the compact run in [`results/RESULTS.md`](results/RESULTS.md) and [`paper/section_results.tex`](paper/section_results.tex). Previous draft numbers are not copied. Tables that could not be measured (official YOLO AP50, registered domain-shift splits, ablation AP) are left blank.
 
-| Item | Paper | Compact run |
+CSV sources: `results/tables/`. Figures: `results/figures/` and `paper/figures/`. JSON: `results/json/`. Rebuild tables with `python scripts/export_results_tables.py`.
+
+| Item | Paper-scale config | Compact run (this host) |
 | --- | --- | --- |
 | Image / latent | 512 / 64 | 64 / 16 |
 | U-Net widths | 320-1280 | 64-192 |
 | Image encoder | ResNet-50 | ResNet-18 |
 | Diffusion steps / DDIM | 1000 / 50 | 100 / 8 |
 | Generator iters | 20 000 | 160 |
-| Candidates / retained | 96 000 / 28 800 | 96 / top 30% |
-| Detectors | YOLO v6–v13 | width/depth stand-ins, same 8-family protocol |
+| Candidates / retained | 96 000 / 28 800 | 96 / 29 |
+| Detectors | YOLO v6–v13 @ 640 | classification proxy (YOLO AP50 unfilled) |
 | Quality ranker | LoRA Qwen2-VL-7B | heuristic teacher + MLP student, same axes/weights |
-
-Claims that can be checked at this scale are **directional**: mixed vs real-only, JCA vs CA-only, MRDL on/off, filter threshold, boundary softness, background PSNR/SSIM.

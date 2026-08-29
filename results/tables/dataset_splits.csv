@@ -1,5 +1,9 @@
-partition,sources_approx,real_smoke
-train,,71
-val,,16
-test,,19
-backgrounds,,90
+partition,n
+train_real_smoke,74
+val_real_smoke,10
+test_real_smoke,23
+eligible_backgrounds,90
+available_masks,74
+generation_pairs,48
+candidates,96
+retained_top30,29

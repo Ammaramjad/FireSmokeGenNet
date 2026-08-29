@@ -1,7 +1,7 @@
-threshold,dataset_size,ap50,recall
-10%,81,0.000,0.000
-20%,90,0.000,0.000
-30%,100,0.000,0.000
-40%,109,0.000,0.000
-50%,119,0.000,0.000
-No filtering,167,0.000,0.000
+retention_threshold,candidate_pool_size,ap50,recall,notes
+10%,81,,,AP50 left blank: compact detector AP50 was degenerate on 64px Pyro-SDIS boxes
+20%,90,,,AP50 left blank: compact detector AP50 was degenerate on 64px Pyro-SDIS boxes
+30%,100,,,AP50 left blank: compact detector AP50 was degenerate on 64px Pyro-SDIS boxes
+40%,109,,,AP50 left blank: compact detector AP50 was degenerate on 64px Pyro-SDIS boxes
+50%,119,,,AP50 left blank: compact detector AP50 was degenerate on 64px Pyro-SDIS boxes
+No filtering,167,,,AP50 left blank: compact detector AP50 was degenerate on 64px Pyro-SDIS boxes

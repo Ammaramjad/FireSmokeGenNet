@@ -1,9 +1,9 @@
-detector,real_mean,real_sd,mixed_mean,mixed_sd,delta,p_adj,dz
-yolov6,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
-yolov7,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
-yolov8,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
-yolov9,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
-yolov10,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
-yolov11,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
-yolov12,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
-yolov13,0.00,0.00,0.00,0.00,0.00,1.0000,0.00
+detector,real_mean,real_sd,mixed_mean,mixed_sd,delta,p_adj,dz,status
+yolov6,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.
+yolov7,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.
+yolov8,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.
+yolov9,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.
+yolov10,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.
+yolov11,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.
+yolov12,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.
+yolov13,,,,,,,,Not filled. Compact AP50=0 on all eight family stand-ins (tiny boxes). Paper YOLO@640 numbers are not copied.

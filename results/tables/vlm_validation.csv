@@ -1,0 +1,5 @@
+quality_dimension,mae_mean,mae_sd,rmse_mean,rmse_sd,spearman_mean,spearman_sd
+Color fidelity,2.71,0.47,3.64,0.48,,
+Visibility,0.97,0.18,1.26,0.28,,
+Translucency,1.69,0.26,2.16,0.22,,
+Composite score (Spearman rho),,,,,0.11,0.25

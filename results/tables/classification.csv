@@ -1,3 +1,3 @@
-condition,s1,s2,s3,s4,s5,mean,sd
-real_only,81.40,86.05,97.67,100.00,100.00,93.02,8.70
-mixed,100.00,100.00,100.00,100.00,100.00,100.00,0.00
+condition,s1,s2,s3,s4,s5,mean,sd,ci_lo,ci_hi,delta_pp,test,p,shapiro_p,dz
+Real only,81.40,86.05,97.67,100.00,100.00,93.02,8.70,82.22,103.83,,,,,
+Real + quality-filtered FireSmokeGenNet,100.00,100.00,100.00,100.00,100.00,100.00,0.00,100.00,100.00,6.98,paired_t,0.147,0.111,0.80

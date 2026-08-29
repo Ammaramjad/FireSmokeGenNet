@@ -1,6 +1,6 @@
-config,ap50,ap50_95,precision,recall
-no_jca,0.000,0.000,0.000,0.000
-no_mrdl,0.000,0.000,0.000,0.000
-rand_encoder,0.000,0.000,0.000,0.000
-full,0.000,0.000,0.000,0.000
-unfiltered,0.000,0.000,0.000,0.000
+configuration,ap50,ap50_95,precision,recall,status
+No JCA (CA only),,,,,AP50 unfilled (degenerate compact detector); architecture still implemented
+No MRDL (omega=0),,,,,AP50 unfilled (degenerate compact detector); architecture still implemented
+ResNet without ImageNet pretraining,,,,,AP50 unfilled (degenerate compact detector); architecture still implemented
+Unfiltered candidate pool,,,,,AP50 unfilled (degenerate compact detector); architecture still implemented
+Full FireSmokeGenNet,,,,,AP50 unfilled (degenerate compact detector); architecture still implemented
